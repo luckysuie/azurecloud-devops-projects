@@ -1,20 +1,34 @@
 ## 1. Powershell script Chrome in Windows VM
 ```bash
-$ChromeInstallerUrl = "https://dl.google.com/tag/s/appguid%3D%7B8A291C25-D830-4911-96B8-863680B797B2%7D%26iid%3D%7B8A291C25-D830-4911-96B8-863680B797B2%7D%26lang%3Den%26browser%3D4%26usagestats%3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dtrue%26brand%3DGCEB%26installdataindex%3Ddefaultbrowser/update2/installers/ChromeStandaloneSetup64.msi"
-$DownloadPath = "$env:TEMP\ChromeStandaloneSetup64.msi"
+# Force the session to use TLS 1.2 (Required for many modern secure downloads)
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-Write-Host "Downloading Google Chrome installer..." -ForegroundColor Cyan
-Invoke-WebRequest -Uri $ChromeInstallerUrl -OutFile $DownloadPath
+# Define clean, direct URLs for the standalone installer
+$ChromeInstallerUrl = "https://dl.google.com/chrome/install/ChromeStandaloneSetup64.exe"
+$DownloadPath = "$env:TEMP\ChromeStandaloneSetup64.exe"
 
-Write-Host "Installing Google Chrome..." -ForegroundColor Cyan
-$InstallArgs = @('/i', "`"$DownloadPath`"", '/qn', '/norestart')
-$Process = Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallArgs -Wait -PassThru
+# Step 1: Download the Chrome standalone installer
+Write-Host "Downloading Google Chrome..." -ForegroundColor Cyan
+try {
+    Invoke-WebRequest -Uri $ChromeInstallerUrl -OutFile $DownloadPath -UseBasicParsing
+    Write-Host "Download complete." -ForegroundColor Green
+} catch {
+    Write-Error "Failed to download Chrome. Error: $_"
+    return
+}
 
-if ($Process.ExitCode -eq 0) {
+# Step 2: Install Chrome silently
+Write-Host "Installing Google Chrome silently..." -ForegroundColor Cyan
+
+# /silent /install are the native switches for Chrome's standalone EXE
+$Process = Start-Process -FilePath $DownloadPath -ArgumentList '/silent', '/install' -Wait -PassThru
+
+# Step 3: Verify and cleanup
+if ($Process.ExitCode -eq 0 -or $Process.ExitCode -eq $null) {
     Write-Host "Google Chrome installed successfully!" -ForegroundColor Green
-    # Clean up the installer file
+    # Clean up the installer
     Remove-Item -Path $DownloadPath -Force
 } else {
-    Write-Warning "Installation failed with exit code $($Process.ExitCode)."
+    Write-Warning "Installation finished, but returned exit code: $($Process.ExitCode)"
 }
 ```
