@@ -1,34 +1,17 @@
 ## 1. Powershell script Chrome in Windows VM
 ```bash
-# Force the session to use TLS 1.2 (Required for many modern secure downloads)
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+# Define the path for the installer
+$Path = "$env:TEMP\ChromeInstaller.exe"
 
-# Define clean, direct URLs for the standalone installer
-$ChromeInstallerUrl = "https://dl.google.com/chrome/install/ChromeStandaloneSetup64.exe"
-$DownloadPath = "$env:TEMP\ChromeStandaloneSetup64.exe"
+# Download the latest Chrome installer
+Write-Host "Downloading Chrome..." -ForegroundColor Cyan
+Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $Path
 
-# Step 1: Download the Chrome standalone installer
-Write-Host "Downloading Google Chrome..." -ForegroundColor Cyan
-try {
-    Invoke-WebRequest -Uri $ChromeInstallerUrl -OutFile $DownloadPath -UseBasicParsing
-    Write-Host "Download complete." -ForegroundColor Green
-} catch {
-    Write-Error "Failed to download Chrome. Error: $_"
-    return
-}
+# Run the installer silently
+Write-Host "Installing Chrome..." -ForegroundColor Cyan
+Start-Process -FilePath $Path -ArgumentList "/silent", "/install" -Wait
 
-# Step 2: Install Chrome silently
-Write-Host "Installing Google Chrome silently..." -ForegroundColor Cyan
-
-# /silent /install are the native switches for Chrome's standalone EXE
-$Process = Start-Process -FilePath $DownloadPath -ArgumentList '/silent', '/install' -Wait -PassThru
-
-# Step 3: Verify and cleanup
-if ($Process.ExitCode -eq 0 -or $Process.ExitCode -eq $null) {
-    Write-Host "Google Chrome installed successfully!" -ForegroundColor Green
-    # Clean up the installer
-    Remove-Item -Path $DownloadPath -Force
-} else {
-    Write-Warning "Installation finished, but returned exit code: $($Process.ExitCode)"
-}
+# Clean up the installer file
+Remove-Item -Path $Path
+Write-Host "Installation Complete!" -ForegroundColor Green
 ```
