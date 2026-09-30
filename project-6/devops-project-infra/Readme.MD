@@ -1,5 +1,8 @@
 ## Deploying a dotnet application to Azure App Service using Terraform, Azure CLI, ACR, Docker and Azure app service.
 
+### ARCHITECTURE DIAGRAM
+![architecture.png]
+
 ### Phase 1: pre-requisites and Requirements of the project
 - valid Azure cloud Account with subscription
 - Azure CLI installed and configured
@@ -99,7 +102,7 @@ ACR_PASSWORD=$(az acr credential show \
  az webapp config container set \
   --resource-group "$RG_NAME" \
   --name "$APP_NAME" \
-  --container-image-name "$ACR_NAME.azurecr.io/razorapp:latest" \
+  --container-image-name "$ACR_NAME.azurecr.io/dotnetwebapp:latest" \
   --container-registry-url "https://$ACR_NAME.azurecr.io" \
   --container-registry-user "$ACR_USERNAME" \
   --container-registry-password "$ACR_PASSWORD" \
@@ -129,5 +132,5 @@ az webapp restart \
 
 
 - output image
-[webapp.png]
+![webapp.png]
 - once all the project is done delete the whole resource group
