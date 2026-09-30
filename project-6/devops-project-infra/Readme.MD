@@ -1,7 +1,7 @@
 ## Deploying a dotnet application to Azure App Service using Terraform, Azure CLI, ACR, Docker and Azure app service.
 
 ### ARCHITECTURE DIAGRAM
-![architecture.png]
+![Architecture Diagram](images/architecture.png)
 
 ### Phase 1: pre-requisites and Requirements of the project
 - valid Azure cloud Account with subscription
@@ -132,5 +132,5 @@ az webapp restart \
 
 
 - output image
-![webapp.png]
+![webapp.png](images/webapp.png)
 - once all the project is done delete the whole resource group
